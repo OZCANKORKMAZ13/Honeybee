@@ -108,7 +108,16 @@ def process_dhs(df_raw: pd.DataFrame) -> pd.DataFrame:
     # --------------------------------------------------
     final_df = pd.concat([time_pivot, response_pivot], axis=1).reset_index()
     final_df.columns.name = None
+    required_columns = [
+        "Morning_IN", "Morning_OUT",
+        "Afternoon_IN", "Afternoon_OUT",
+        "Morning_IN_Response", "Morning_OUT_Response",
+        "Afternoon_IN_Response", "Afternoon_OUT_Response",
+    ]
 
+    for col in required_columns:
+        if col not in final_df.columns:
+            final_df[col] = pd.NA
     final_df = final_df.sort_values(by="FullName").reset_index(drop=True)
 
     return final_df
