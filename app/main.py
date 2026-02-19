@@ -3,7 +3,7 @@ from datetime import datetime
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 from openpyxl.styles import Font
-
+from openpyxl.styles import Border, Side
 # from procare_processor import process_procare
 # from dhs_processor import process_dhs
 
@@ -26,7 +26,12 @@ COLOR_MAP = {
     "Not Swiped OUT": RED,
     "Not Swiped BOTH": RED
 }
-
+THICK_BORDER = Border(
+    left=Side(style="medium"),
+    right=Side(style="medium"),
+    top=Side(style="medium"),
+    bottom=Side(style="medium"),
+)
 # ================== TIME HELPERS ==================
 def not_swiped_reason(p_in, p_out):
     if not p_in and p_out:
@@ -39,7 +44,16 @@ def parse_time(t):
         return datetime.strptime(t, "%H:%M").time()
     except:
         return None
+def auto_adjust_column_width(ws, padding=4):
+    for col in ws.columns:
+        max_length = 0
+        col_letter = col[0].column_letter
 
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+
+        ws.column_dimensions[col_letter].width = max_length + padding
 def in_range(t, start, end):
     t = parse_time(t)
     return bool(t) and start <= t <= end
@@ -316,7 +330,14 @@ def run_pipeline(
 
         if ar in COLOR_MAP:
             ws[f"I{r}"].fill = COLOR_MAP[ar]
-
+    for row in ws.iter_rows(
+        min_row=1,
+        max_row=ws.max_row,
+        min_col=1,
+        max_col=ws.max_column
+    ):
+        for cell in row:
+            cell.border = THICK_BORDER
             
     ws.insert_rows(1, amount=3)
 
@@ -327,5 +348,5 @@ def run_pipeline(
         for c, val in enumerate(procare_top_rows.iloc[r]):
             cell = ws.cell(row=r + 1, column=c + 1, value=val)
             cell.font = bold_font
-            
+    auto_adjust_column_width(ws, padding=4)           
     wb.save(output_file)
