@@ -239,7 +239,7 @@ if st.session_state.page == "🐝 Daily Attendance":
         st.success("✅ DHS file uploaded successfully")
 
     if st.button(
-        "🚀 Generate Attendance Report",
+        "🚀 Generate Daily Report",
         type="primary",
         use_container_width=True,
         disabled=st.session_state.is_processing
