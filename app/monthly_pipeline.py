@@ -53,7 +53,7 @@ def process_final(procare_file, dhs_file, auth_file):
 
     print("✔ Excel ve PDF işlemleri tamamlandı.\n")
 
-    first = excel_result["data"]
+    first, header_rows = excel_result["data"]
     second = pdf_result["data"]
 
 #   🔧 Clean column names
@@ -284,11 +284,24 @@ def process_final(procare_file, dhs_file, auth_file):
     second.to_excel(output, index=False, engine="openpyxl")
     output.seek(0)
 
+    # --------------------------------------------------
+    # PROCARE HEADER SATIRLARINI EN ÜSTE EKLE
+    # --------------------------------------------------
+
+    # Excel'e yazılmış dosyayı aç
     wb = load_workbook(output)
     ws = wb.active
 
+    # En üste 3 satır boşluk aç
+    ws.insert_rows(1, amount=3)
+
+    # Header satırlarını yaz
+    for i, row in enumerate(header_rows.values, start=1):
+        first_cell_value = row[0]  # sadece ilk kolon
+        ws.cell(row=i, column=1, value=first_cell_value)
+
     note_col = None
-    for idx, cell in enumerate(ws[1], start=1):
+    for idx, cell in enumerate(ws[4], start=1):
         if cell.value == "NOTE":
             note_col = idx
             break
@@ -297,7 +310,7 @@ def process_final(procare_file, dhs_file, auth_file):
     green = PatternFill(start_color="CCFFCC", end_color="CCFFCC", fill_type="solid")
     yellow = PatternFill(start_color="FFFF99", end_color="FFFF99", fill_type="solid")
 
-    for row in ws.iter_rows(min_row=2):
+    for row in ws.iter_rows(min_row=5):
         note_cell = row[note_col - 1]
         note_value = str(note_cell.value).strip().upper()
 
