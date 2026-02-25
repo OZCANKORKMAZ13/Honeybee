@@ -327,7 +327,7 @@ def process_final(procare_file, dhs_file, auth_file):
 
     # ===== APPLY THICK BORDERS =====
     for row in ws.iter_rows(
-        min_row=1,
+        min_row=4,
         max_row=ws.max_row,
         min_col=1,
         max_col=ws.max_column
