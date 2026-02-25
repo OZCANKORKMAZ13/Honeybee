@@ -21,6 +21,10 @@ def process_excel(file):
 
     month_num = months[month_str]
 
+    df_raw = pd.read_excel(file, header=None)
+    
+    # 2️⃣ İlk 3 satırı al
+    header_rows = df_raw.head(3)
     # ------------------ 2) ANA TABLOYU OKU ------------------
     df = pd.read_excel(file, header=8)
 
@@ -100,4 +104,5 @@ def process_excel(file):
     final_df = final_df.drop(columns=["IN", "OUT"], errors="ignore")
 
     # 🔥 SADECE BU EKLENDİ
-    return final_df
+
+    return final_df, header_rows
