@@ -18,12 +18,32 @@ THICK_BORDER = Border(
     bottom=Side(style="medium"),
 )
 
-def auto_adjust_column_width(ws, padding=4):
-    for column_cells in ws.columns:
-        max_length = 0
-        column_letter = column_cells[0].column_letter
+# def auto_adjust_column_width(ws, padding=4):
+#     for column_cells in ws.columns:
+#         max_length = 0
+#         column_letter = column_cells[0].column_letter
 
-        for cell in column_cells:
+#         for cell in column_cells:
+#             if cell.value:
+#                 max_length = max(max_length, len(str(cell.value)))
+
+#         ws.column_dimensions[column_letter].width = max_length + padding
+
+from openpyxl.utils import get_column_letter
+
+def auto_adjust_column_width(ws, padding=4):
+    for col_idx in range(1, ws.max_column + 1):
+
+        column_letter = get_column_letter(col_idx)
+        max_length = 0
+
+        for row in range(1, ws.max_row + 1):
+            cell = ws.cell(row=row, column=col_idx)
+
+            # merged hücreleri atla
+            if cell.coordinate in ws.merged_cells:
+                continue
+
             if cell.value:
                 max_length = max(max_length, len(str(cell.value)))
 
@@ -299,6 +319,13 @@ def process_final(procare_file, dhs_file, auth_file):
     for i, row in enumerate(header_rows.values, start=1):
         first_cell_value = row[0]  # sadece ilk kolon
         ws.cell(row=i, column=1, value=first_cell_value)
+
+    from openpyxl.styles import Alignment
+
+    # ===== MERGE + CENTER FIRST 3 ROWS (A-H) =====
+    for row_idx in range(1, 4):  # sadece ilk 3 satır
+        ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=8)
+        ws.cell(row=row_idx, column=1).alignment = Alignment(horizontal="center", vertical="center")
 
     note_col = None
     for idx, cell in enumerate(ws[4], start=1):
