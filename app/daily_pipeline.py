@@ -48,16 +48,35 @@ def parse_time(t):
     except:
         return None
     
-def auto_adjust_column_width(ws, padding=4):
-    for col in ws.columns:
-        max_length = 0
-        col_letter = col[0].column_letter
+# def auto_adjust_column_width(ws, padding=4):
+#     for col in ws.columns:
+#         max_length = 0
+#         col_letter = col[0].column_letter
 
-        for cell in col:
+#         for cell in col:
+#             if cell.value:
+#                 max_length = max(max_length, len(str(cell.value)))
+
+#         ws.column_dimensions[col_letter].width = max_length + padding
+from openpyxl.utils import get_column_letter
+
+def auto_adjust_column_width(ws, padding=4):
+    for col_idx in range(1, ws.max_column + 1):
+
+        column_letter = get_column_letter(col_idx)
+        max_length = 0
+
+        for row in range(1, ws.max_row + 1):
+            cell = ws.cell(row=row, column=col_idx)
+
+            # merged hücreleri atla
+            if cell.coordinate in ws.merged_cells:
+                continue
+
             if cell.value:
                 max_length = max(max_length, len(str(cell.value)))
 
-        ws.column_dimensions[col_letter].width = max_length + padding
+        ws.column_dimensions[column_letter].width = max_length + padding
 
 def in_range(t, start, end):
     t = parse_time(t)
@@ -343,6 +362,14 @@ def run_pipeline(
         for c, val in enumerate(procare_top_rows.iloc[r]):
             cell = ws.cell(row=r + 1, column=c + 1, value=val)
             cell.font = bold_font
+    
+    from openpyxl.styles import Alignment
+
+    # ===== MERGE + CENTER FIRST 3 ROWS (A-H) =====
+    for row_idx in range(1, 4):
+        ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=9)
+        ws.cell(row=row_idx, column=1).alignment = Alignment(horizontal="center", vertical="center")
+    
     
     auto_adjust_column_width(ws, padding=4)
             
