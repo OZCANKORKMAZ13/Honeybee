@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
+from openpyxl.styles.fills import Fill, PatternFill
 from openpyxl.styles import Font
 from openpyxl.styles import Border, Side
 
@@ -372,5 +373,12 @@ def run_pipeline(
     
     
     auto_adjust_column_width(ws, padding=4)
+
+    # Fix for Python 3.14 + openpyxl compatibility
+
+    wb._fills = [
+        f if isinstance(f, Fill) else PatternFill()
+        for f in wb._fills
+    ]
             
     wb.save(output_file)
