@@ -2,6 +2,26 @@ import fitz  # PyMuPDF
 import re
 import pandas as pd
 
+
+def parse_amount(value):
+    if value is None:
+        return 0.0
+
+    text = str(value).strip()
+    if not text:
+        return 0.0
+
+    if "," in text and "." in text:
+        text = text.replace(".", "").replace(",", ".")
+    elif "," in text:
+        text = text.replace(",", ".")
+
+    try:
+        return float(text)
+    except ValueError:
+        return 0.0
+
+
 def extract_name(lines, start_idx):
     """
     lines: sayfadaki satırlar
@@ -25,7 +45,7 @@ def process_pdf(file):
     pdf = fitz.open(stream=file.read(), filetype="pdf")
 
     date_pattern = re.compile(r"^\d{2}/\d{2}/\d{4}")
-    number_pattern = re.compile(r"^\d+(\.\d+)?$")
+    number_pattern = re.compile(r"^\d+(?:[.,]\d{1,2})?$")
 
     current_name = ""
     current_case = ""
@@ -55,8 +75,8 @@ def process_pdf(file):
                 if current_group:
                     numbers = [x for x in current_group[1:] if number_pattern.match(x)]
                     numbers_to_print = numbers[:2]
-                    copay = float(numbers_to_print[0]) if len(numbers_to_print) > 0 else 0.0
-                    amount = float(numbers_to_print[1]) if len(numbers_to_print) > 1 else 0.0
+                    copay = parse_amount(numbers_to_print[0]) if len(numbers_to_print) > 0 else 0.0
+                    amount = parse_amount(numbers_to_print[1]) if len(numbers_to_print) > 1 else 0.0
                     data.append([current_name, current_case, current_group[0], copay, amount])
                     current_group = []
                 current_group.append(line)
@@ -69,8 +89,8 @@ def process_pdf(file):
                     if current_group:
                         numbers = [x for x in current_group[1:] if number_pattern.match(x)]
                         numbers_to_print = numbers[:2]
-                        copay = float(numbers_to_print[0]) if len(numbers_to_print) > 0 else 0.0
-                        amount = float(numbers_to_print[1]) if len(numbers_to_print) > 1 else 0.0
+                        copay = parse_amount(numbers_to_print[0]) if len(numbers_to_print) > 0 else 0.0
+                        amount = parse_amount(numbers_to_print[1]) if len(numbers_to_print) > 1 else 0.0
                         data.append([current_name, current_case, current_group[0], copay, amount])
                         current_group = []
 
@@ -80,8 +100,8 @@ def process_pdf(file):
         if current_group:
             numbers = [x for x in current_group[1:] if number_pattern.match(x)]
             numbers_to_print = numbers[:2]
-            copay = float(numbers_to_print[0]) if len(numbers_to_print) > 0 else 0.0
-            amount = float(numbers_to_print[1]) if len(numbers_to_print) > 1 else 0.0
+            copay = parse_amount(numbers_to_print[0]) if len(numbers_to_print) > 0 else 0.0
+            amount = parse_amount(numbers_to_print[1]) if len(numbers_to_print) > 1 else 0.0
             data.append([current_name, current_case, current_group[0], copay, amount])
             current_group = []
 
