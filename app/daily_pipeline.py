@@ -139,7 +139,16 @@ def run_pipeline(
     dhs_raw = process_dhs(df_dhs_raw).fillna("")
 
     # ---------- NORMALIZE ----------
-    procare["StudentID"] = procare["StudentID"].astype(str).str.strip()
+    #procare["StudentID"] = procare["StudentID"].astype(str).str.strip()
+    # Normalize StudentID to collapse whitespace/tabs into '/' so it matches DHS keys
+    procare["StudentID"] = (
+        procare["StudentID"].astype(str)
+        .str.strip()
+        .str.replace(r"\t+", "/", regex=True)
+        .str.replace(r"\s+", "/", regex=True)
+        .str.replace(r"/+", "/", regex=True)
+        .str.strip("/")
+    )
     procare["Attdate"] = procare["Attdate"].astype(str).str.strip()
 
     dhs_raw["StudentID"] = dhs_raw["StudentID"].astype(str).str.strip()
