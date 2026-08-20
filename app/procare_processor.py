@@ -67,6 +67,17 @@ def process_procare(df_raw: pd.DataFrame, header_text: str) -> pd.DataFrame:
         first = row.get("First Name")
         last = row.get("Last Name")
         student_id = row.get("External Student ID")
+        # Normalize student id: replace tabs/whitespace runs with '/' and collapse multiple slashes
+        if pd.notna(student_id):
+            sid = str(student_id)
+            # first strip leading/trailing whitespace so replacements don't create edge slashes
+            sid = sid.strip()
+            sid = re.sub(r"\t+", "/", sid)
+            sid = re.sub(r"\s+", "/", sid)
+            sid = re.sub(r"/+", "/", sid)
+            # finally, remove any accidental leading/trailing slashes
+            sid = sid.strip('/')
+            student_id = sid
 
         for in_col in in_cols:
             base = in_col.replace(" IN", "")
@@ -102,12 +113,16 @@ def process_procare(df_raw: pd.DataFrame, header_text: str) -> pd.DataFrame:
     final_df["Attdate"] = pd.to_datetime(final_df["Attdate"], errors="coerce")
 
     final_df["IN_dt"] = pd.to_datetime(
-        final_df["Attdate"].dt.strftime("%Y-%m-%d") + " " + final_df["IN"],
+        #final_df["Attdate"].dt.strftime("%Y-%m-%d") + " " + final_df["IN"],
+        final_df["Attdate"].dt.strftime("%Y-%m-%d") + " " + final_df["IN"].astype(str).str.strip(),
+        format="%Y-%m-%d %I:%M %p",
         errors="coerce"
     )
 
     final_df["OUT_dt"] = pd.to_datetime(
-        final_df["Attdate"].dt.strftime("%Y-%m-%d") + " " + final_df["OUT"],
+        # final_df["Attdate"].dt.strftime("%Y-%m-%d") + " " + final_df["OUT"],
+        final_df["Attdate"].dt.strftime("%Y-%m-%d") + " " + final_df["OUT"].astype(str).str.strip(),
+        format="%Y-%m-%d %I:%M %p",
         errors="coerce"
     )
 
