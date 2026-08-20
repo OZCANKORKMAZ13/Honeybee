@@ -60,6 +60,17 @@ def process_excel(file):
         first = row["First Name"]
         last = row["Last Name"]
         student_id = row["External Student ID"]
+        # Normalize student id to match DHS format (e.g. J300088/006)
+        if pd.notna(student_id):
+            sid = str(student_id)
+            # strip outer whitespace first to avoid creating edge '/'
+            sid = sid.strip()
+            sid = re.sub(r"\t+", "/", sid)
+            sid = re.sub(r"\s+", "/", sid)
+            sid = re.sub(r"/+", "/", sid)
+            # remove any leading/trailing slashes
+            sid = sid.strip('/')
+            student_id = sid
 
         for in_col in in_cols:
             base = in_col.replace(" IN", "")
