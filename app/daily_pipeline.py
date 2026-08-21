@@ -118,8 +118,8 @@ def pick_time_dhs(df, time_col, resp_col, pick):
 # ================== SLOT WINDOWS ==================
 MORNING_START = parse_time("06:00")
 MORNING_END   = parse_time("07:50")
-AFTER_START   = parse_time("15:00")
-AFTER_END     = parse_time("18:30")
+AFTER_START   = parse_time("14:45")
+AFTER_END     = parse_time("18:45")
 
 # ==================================================
 # 🔥 MAIN ORCHESTRATION FUNCTION
