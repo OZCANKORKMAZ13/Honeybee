@@ -54,6 +54,9 @@ def process_dhs(df_raw: pd.DataFrame) -> pd.DataFrame:
 
     # Geçersizleri at
     df = df[df["Trans_Clean"].notna()]
+    
+    # DD kayıtlarını seçimden çıkar
+    df = df[~df["Response"].fillna("").str.contains(r"\(DD\)", na=False)]
 
     # --------------------------------------------------
     # 6️⃣ Kolon isimleri

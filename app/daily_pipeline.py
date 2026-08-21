@@ -23,6 +23,8 @@ COLOR_MAP = {
     "Void Transaction": YELLOW,
     "Void & Update Transaction": YELLOW,
     "Inform Parent": YELLOW,
+    "Inform Parent - Diff Provider": YELLOW,
+    "Not In Procare - Diff Provider": YELLOW,
     "Update Procare": YELLOW,
     "Not Swiped IN": RED,
     "Not Swiped OUT": RED,
@@ -232,7 +234,7 @@ def run_pipeline(
 
         if valid:
             if any(is_b4(r) for r in responses):
-                return "Inform Parent", YELLOW, final_in, final_out
+                return "Inform Parent - Diff Provider", YELLOW, final_in, final_out
             return "Swiped", GREEN, final_in, final_out
 
         return "Void & Update Transaction", YELLOW, final_in, final_out
@@ -282,11 +284,19 @@ def run_pipeline(
 
             "Morning_IN": d["Morning_IN"] if has_morning else "",
             "Morning_OUT": d["Morning_OUT"] if has_morning else "",
-            "Morning_Response": "Void Transaction" if has_morning else "",
+            "Morning_Response": (
+                "Not In Procare - Diff Provider"
+                if has_morning and any(is_b4(d.get(response, "")) for response in ["Morning_IN_Response", "Morning_OUT_Response"])
+                else "Void Transaction" if has_morning else ""
+            ),
 
             "Afternoon_IN": d["Afternoon_IN"] if has_afternoon else "",
             "Afternoon_OUT": d["Afternoon_OUT"] if has_afternoon else "",
-            "Afternoon_Response": "Void Transaction" if has_afternoon else "",
+            "Afternoon_Response": (
+                "Not In Procare - Diff Provider"
+                if has_afternoon and any(is_b4(d.get(response, "")) for response in ["Afternoon_IN_Response", "Afternoon_OUT_Response"])
+                else "Void Transaction" if has_afternoon else ""
+            ),
 
             "M_Color": YELLOW if has_morning else None,
             "A_Color": YELLOW if has_afternoon else None
